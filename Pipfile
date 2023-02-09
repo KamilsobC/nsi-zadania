@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pyside6 = "*"
+numpy = "*"
+matplotlib = "*"
+pyqt5 = "*"
+pyqt5-tools = "*"
+jupyterlab = "*"
+pandas = "*"
+pillow = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
