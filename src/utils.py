@@ -41,10 +41,12 @@ def create_train_test_sets(d):
     y_test = test['label'].to_numpy()
     return x_train,x_test,y_train,y_test
 
-def read_csv_to_pd(path):
+def read_csv_to_pd(path,as_list=False):
     columns = ['label','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35']
     data = pd.read_csv(path)
     data.columns = columns
+    if as_list:
+        return data.values.tolist()
     return data
 
 def prepare_data_for_perceptron(data,number):
@@ -54,27 +56,6 @@ def prepare_data_for_perceptron(data,number):
     data_rest.loc[data_rest['label'] >=0, 'label'] = 0
     return pd.concat([data_desired, data_rest])
 
-def calculate_accuracy(x_test, y_test,perceptron):
-    tp, tn, fp, fn = 0, 0, 0, 0
-
-    for sample, label in zip(x_test, y_test):
-
-        prediction = perceptron.predict(sample)
-
-        if prediction == label:
-            if prediction == 1:
-                tp += 1
-            else:
-                tn += 1
-        else:
-            if prediction == 1:
-                fp += 1
-            else:
-                fn += 1
-
-    accuracy = (tp + tn)/(tp + tn + fp + fn)
-    print(tp,tn,fp,fn)
-    return accuracy
 
 def save_pickle(object,path):
     with open(path,'wb') as pth:
@@ -82,7 +63,10 @@ def save_pickle(object,path):
 
 def load_pickle(path):
     object = None
-    with open(path,'rb') as pth:
-        object = pickle.load(pth)
+    try:
+        with open(path,'rb') as pth:
+            object = pickle.load(pth)
+    except FileNotFoundError as e:
+        print('no pickles found')
     return object
   

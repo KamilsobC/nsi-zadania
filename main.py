@@ -1,20 +1,82 @@
-from PyQt5 import QtWidgets, uic
-import sys, os
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtCore import QModelIndex
+from ui import Ui_Dialog
+import sys
+from src.utils import *
+from src.DataLogic import DataLogic
+class ApplicationWindow(QtWidgets.QDialog):
+    def __init__(self):
+        super(ApplicationWindow, self).__init__()
+
+        self.data = None
+        self.perceptrons = None
+        self.current_number_pixels = None
+        self.current_number_label = None
+        
+        self.ui = Ui_Dialog()
+        self.ui.setupUi(self)
+
+        self.init_buttons()        
+        self.init_list()
+
+        self.ui.predictButton.clicked.connect(self._on_clicked_pushButton)
+        self.ui.listView.clicked[QModelIndex].connect(self._on_clicked_ListViewItem)
 
 
-class MyWindow(QtWidgets.QDialog):
 
-    def __init__(self, *args, **kwargs):
-        super(MyWindow, self).__init__(*args, **kwargs)
+    def init_list(self):
+        self.list_item_model = QStandardItemModel()
+        self.ui.listView.setModel(self.list_item_model)
+        self.load_numbers()
+        for index,item in enumerate(self.data):
+            self.list_item_model.appendRow(QStandardItem(str(index) + '_' + str(item[0])))
+    
 
-        # Load the UI Page - added path too
-        ui_path = os.path.dirname(os.path.abspath(__file__))
-        uic.loadUi(os.path.join(ui_path, "untitled.ui"), self)
+    def init_buttons(self):
+        self.buttons=[]
+        self.buttons.append(getattr(self.ui,'checkBox'))
+        for item in range(2,36):
+            res= 'checkBox_'+str(item)
+            self.buttons.append(getattr(self.ui,res))
 
 
+    def _on_clicked_pushButton(self):
+        self.ui.predict_label.setText('hej')
 
-if __name__ == '__main__':
+    
+    def _on_clicked_ListViewItem(self):
+        row_index = self.ui.listView.currentIndex().row()
+        self.load_number_from_data(row_index)
+
+    def load_numbers(self):
+        self.data = read_csv_to_pd('result.csv',True)
+
+    def load_number_from_data(self,i):
+        number = self.data[i]
+        self.current_number_pixels = number[1:]
+        self.current_number_label = number[0]
+        self.draw_number_from_data()
+
+    def draw_number_from_data(self):
+        self.clear()
+        self.ui.currentNumberLabel.setText(str(self.current_number_label))
+        for index,px in enumerate(self.current_number_pixels):
+            if px == 255:
+                self.buttons[index].setChecked(True)
+
+    def clear(self):
+        for button in self.buttons:
+            button.setChecked(False)
+
+    def load_perceptrons():
+        pass
+    
+def main():
     app = QtWidgets.QApplication(sys.argv)
-    main = MyWindow()
-    main.show()
+    application = ApplicationWindow()
+    application.show()
     sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    main()
