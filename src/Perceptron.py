@@ -42,7 +42,7 @@ class Perceptron:
         prediction = self.activation_function(prediction)
         return prediction
     
-    def train(self,data,labels):
+    def train(self,data,labels,log=False):
         lr = self.learning_rate
         epoch = 0
         error = 999
@@ -76,8 +76,8 @@ class Perceptron:
             epochs.append(epoch)
             error = errors[-1]
             epoch += 1
-
-            print('Epoch {}. loss: {}'.format(epoch, errors[-1]))
+            if log:
+                print('Epoch {}. loss: {}'.format(epoch, errors[-1]))
             self.weights=weights
             self.bias = bias
             self.errors_history = errors

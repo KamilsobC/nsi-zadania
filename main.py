@@ -4,7 +4,7 @@ from PyQt5.QtCore import QModelIndex
 from ui import Ui_Dialog
 import sys
 from src.utils import *
-from src.DataLogic import DataLogic
+from src.DigitClassifier35 import DigitClassifier35
 class ApplicationWindow(QtWidgets.QDialog):
     def __init__(self):
         super(ApplicationWindow, self).__init__()
@@ -13,7 +13,9 @@ class ApplicationWindow(QtWidgets.QDialog):
         self.perceptrons = None
         self.current_number_pixels = None
         self.current_number_label = None
-        
+        self.classifier = DigitClassifier35()
+        self.classifier.load_perceptrons()
+
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
 
@@ -42,7 +44,9 @@ class ApplicationWindow(QtWidgets.QDialog):
 
 
     def _on_clicked_pushButton(self):
-        self.ui.predict_label.setText('hej')
+        data = list_to_numpy(self.current_number_pixels,True)
+        result = self.classifier.classify(data,self.current_number_label)
+        self.ui.predict_label.setText(str(result))
 
     
     def _on_clicked_ListViewItem(self):

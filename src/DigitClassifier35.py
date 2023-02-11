@@ -5,11 +5,9 @@ from src.utils import *
 class DigitClassifier35:
 
     def __init__(self,path_to_data='result.csv'):
-        self.data = self.load_data(path_to_data)
-        self.perceptrons = self.load_perceptrons() 
-        if None in self.perceptrons:
-            self.train_and_save(self.data)
-            self.perceptrons = self.load_perceptrons()
+        self.perceptrons = []
+        pass
+
         
     def train_and_save(self,data):
         for i in range(10):
@@ -19,7 +17,7 @@ class DigitClassifier35:
             perceptron.train(x_train, y_train)   
             save_pickle(perceptron,'saved_data/perc'+perceptron.name+'.pickle')
     
-    def calculate_accuracy(x_test, y_test,perceptron):
+    def calculate_accuracy(self,x_test, y_test,perceptron):
         tp, tn, fp, fn = 0, 0, 0, 0
 
         for sample, label in zip(x_test, y_test):
@@ -51,11 +49,17 @@ class DigitClassifier35:
             perceptron =load_pickle('saved_data/perc'+ str(i) +'.pickle')
             perceptrons.append(perceptron)
         
-        return perceptrons
+        self.perceptrons=perceptrons
 
-    def classify(self):
-        print('tej')
+    def classify(self,data,label):
+        results = []
+        for perceptron in self.perceptrons:
+            x = perceptron.predict(data)
+            if x == 1:
+                print(perceptron.name + " result" + str(x))
+                results.append(perceptron.name)
+        return results
 
 if __name__ == "__main__":
     dc = DigitClassifier35()
-    dc.classify()
+    

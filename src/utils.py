@@ -41,6 +41,12 @@ def create_train_test_sets(d):
     y_test = test['label'].to_numpy()
     return x_train,x_test,y_train,y_test
 
+def prepare_data(d):
+    d = d.sample(frac=1)
+    x = d.drop('label',axis=1).to_numpy()/255
+    y = d['label'].to_numpy()
+    return x,y
+
 def read_csv_to_pd(path,as_list=False):
     columns = ['label','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35']
     data = pd.read_csv(path)
@@ -60,6 +66,12 @@ def prepare_data_for_perceptron(data,number):
 def save_pickle(object,path):
     with open(path,'wb') as pth:
         pickle.dump(object,pth,pickle.HIGHEST_PROTOCOL)
+
+
+def list_to_numpy(data,normalize=False):
+    if normalize:
+        return np.array(data)/255
+    return np.array(data)
 
 def load_pickle(path):
     object = None
