@@ -15,7 +15,7 @@ class DigitClassifier35:
             data_for_number = prepare_data_for_perceptron(data,int(perceptron.name))
             x_train,x_test,y_train,y_test =  create_train_test_sets(data_for_number)
             perceptron.train(x_train, y_train)   
-            save_pickle(perceptron,'saved_data/perc'+perceptron.name+'.pickle')
+            save_pickle(perceptron,'saved_data/perc'+str(perceptron.name)+'.pickle')
     
     def calculate_accuracy(self,x_test, y_test,perceptron):
         tp, tn, fp, fn = 0, 0, 0, 0
@@ -23,20 +23,23 @@ class DigitClassifier35:
         for sample, label in zip(x_test, y_test):
 
             prediction = perceptron.predict(sample)
-
-            if prediction == label:
-                if prediction == 1:
-                    tp += 1
+            if prediction ==1:
+                if int(perceptron.name) == label:
+                    tp+=1
                 else:
-                    tn += 1
-            else:
-                if prediction == 1:
-                    fp += 1
+                    fp+=1
+            else: 
+                if int(perceptron.name) != label:
+                    tn+=1
                 else:
-                    fn += 1
-
+                    fn+=1
+            
         accuracy = (tp + tn)/(tp + tn + fp + fn)
+        print("tp","tn","fp","fn")
         print(tp,tn,fp,fn)
+        print(accuracy)
+        print()
+
         return accuracy
 
     def load_data(self,path_to_data='result.csv'):
@@ -54,9 +57,8 @@ class DigitClassifier35:
     def classify(self,data,label):
         results = []
         for perceptron in self.perceptrons:
-            x = perceptron.predict(data)
-            if x == 1:
-                print(perceptron.name + " result" + str(x))
+            prediction = perceptron.predict(data)
+            if prediction == 1:
                 results.append(perceptron.name)
         return results
 
