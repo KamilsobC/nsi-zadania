@@ -2,7 +2,7 @@ import pandas as pd
 from PIL import Image
 import os 
 import numpy as np
-
+import pickle
 def bmp_to_array(path,number):
     im = Image.open(path)
     p = np.array(im)
@@ -75,3 +75,14 @@ def calculate_accuracy(x_test, y_test,perceptron):
     accuracy = (tp + tn)/(tp + tn + fp + fn)
     print(tp,tn,fp,fn)
     return accuracy
+
+def save_pickle(object,path):
+    with open(path,'wb') as pth:
+        pickle.dump(object,pth,pickle.HIGHEST_PROTOCOL)
+
+def load_pickle(path):
+    object = None
+    with open(path,'rb') as pth:
+        object = pickle.load(pth)
+    return object
+  

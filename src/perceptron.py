@@ -7,8 +7,9 @@ class Perceptron:
         self.weights = weights
         self.bias = bias
         self.errors_history = errors_history
-        self.learning_rate = learning_rate
-
+        self.learning_rate = learning_rate  
+    def __str__(self):
+        return self.name
     def forwardprop(self,data,label,weights=None,bias=None):
         if weights is None:
             weights = self.weights
