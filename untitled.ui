@@ -18,8 +18,8 @@
     <rect>
      <x>70</x>
      <y>40</y>
-     <width>516</width>
-     <height>441</height>
+     <width>611</width>
+     <height>501</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -1293,6 +1293,13 @@ QCheckBox:indicator:checked {
        <widget class="QPushButton" name="predictButton">
         <property name="text">
          <string>predict</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>clear</string>
         </property>
        </widget>
       </item>

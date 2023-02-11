@@ -38,7 +38,7 @@ class DigitClassifier35:
         print("tp","tn","fp","fn")
         print(tp,tn,fp,fn)
         print(accuracy)
-        print()
+        print
 
         return accuracy
 
@@ -54,7 +54,7 @@ class DigitClassifier35:
         
         self.perceptrons=perceptrons
 
-    def classify(self,data,label):
+    def classify(self,data):
         results = []
         for perceptron in self.perceptrons:
             prediction = perceptron.predict(data)

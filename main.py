@@ -11,11 +11,18 @@ class ApplicationWindow(QtWidgets.QDialog):
 
         self.data = None
         self.perceptrons = None
-        self.current_number_pixels = None
+        self.current_number_pixels = [0]*35
         self.current_number_label = None
         self.classifier = DigitClassifier35()
         self.classifier.load_perceptrons()
-
+        
+        data = read_csv_to_pd('result.csv')
+        data_x,data_y = prepare_data(data)
+        for per in self.classifier.perceptrons:
+            print(per.name)
+            self.classifier.calculate_accuracy(data_x,data_y,per)
+        
+        
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
 
@@ -24,6 +31,7 @@ class ApplicationWindow(QtWidgets.QDialog):
 
         self.ui.predictButton.clicked.connect(self._on_clicked_pushButton)
         self.ui.listView.clicked[QModelIndex].connect(self._on_clicked_ListViewItem)
+        self.ui.pushButton.clicked.connect(self._on_clicked_clear)
 
 
 
@@ -40,14 +48,29 @@ class ApplicationWindow(QtWidgets.QDialog):
         self.buttons.append(getattr(self.ui,'checkBox'))
         for item in range(2,36):
             res= 'checkBox_'+str(item)
-            self.buttons.append(getattr(self.ui,res))
+            button =  getattr(self.ui,res)
+            self.buttons.append(button)
+        for button in self.buttons:
+            button.clicked.connect(self._on_clicked_matrix)
 
+
+    def _on_clicked_clear(self):
+        self.ui.predict_label.setText("")
+        self.current_number_pixels = [0]*35
+        self.current_number_label = None
+        self.clear()
 
     def _on_clicked_pushButton(self):
+        self.ui.predict_label.setText("")
         data = list_to_numpy(self.current_number_pixels,True)
-        result = self.classifier.classify(data,self.current_number_label)
+        result = self.classifier.classify(data)
         self.ui.predict_label.setText(str(result))
-
+    
+    def _on_clicked_matrix(self):
+        for index,button in enumerate(self.buttons):
+            if button.isChecked():
+                print(index)
+                self.current_number_pixels[index]=255
     
     def _on_clicked_ListViewItem(self):
         row_index = self.ui.listView.currentIndex().row()

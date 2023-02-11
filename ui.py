@@ -16,7 +16,7 @@ class Ui_Dialog(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(695, 561)
         self.horizontalLayoutWidget = QtWidgets.QWidget(Dialog)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(70, 40, 516, 441))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(70, 40, 611, 501))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -678,6 +678,9 @@ class Ui_Dialog(object):
         self.predictButton = QtWidgets.QPushButton(self.horizontalLayoutWidget)
         self.predictButton.setObjectName("predictButton")
         self.verticalLayout.addWidget(self.predictButton)
+        self.pushButton = QtWidgets.QPushButton(self.horizontalLayoutWidget)
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.pushButton)
         self.horizontalLayout.addLayout(self.verticalLayout)
 
         self.retranslateUi(Dialog)
@@ -690,3 +693,4 @@ class Ui_Dialog(object):
         self.label_3.setText(_translate("Dialog", "TextLabel"))
         self.predict_label.setText(_translate("Dialog", "result"))
         self.predictButton.setText(_translate("Dialog", "predict"))
+        self.pushButton.setText(_translate("Dialog", "clear"))
