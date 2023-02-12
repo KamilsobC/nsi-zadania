@@ -5,18 +5,23 @@ from ui import Ui_Dialog
 import sys
 from src.utils import *
 from src.DigitClassifier35 import DigitClassifier35
-class ApplicationWindow(QtWidgets.QDialog):
-    def __init__(self):
-        super(ApplicationWindow, self).__init__()
+import csv
 
+class ApplicationWindow(QtWidgets.QDialog):
+    def __init__(self,config):
+        super(ApplicationWindow, self).__init__()
+        self.path = config.path
+        
         self.data = None
         self.perceptrons = None
-        self.current_number_pixels = [0]*35
+        self.current_number_pixels = [0]*config.total
         self.current_number_label = None
+        self.label_to_save = None
+        
         self.classifier = DigitClassifier35()
         self.classifier.load_perceptrons()
         
-        data = read_csv_to_pd('result.csv')
+        data = read_csv_to_pd(self.path)
         data_x,data_y = prepare_data(data)
         for per in self.classifier.perceptrons:
             print(per.name)
@@ -32,17 +37,20 @@ class ApplicationWindow(QtWidgets.QDialog):
         self.ui.predictButton.clicked.connect(self._on_clicked_pushButton)
         self.ui.listView.clicked[QModelIndex].connect(self._on_clicked_ListViewItem)
         self.ui.pushButton.clicked.connect(self._on_clicked_clear)
-
-
+        self.ui.save_as_button.clicked.connect(self._on_clicked_save)
+        self.ui.number_label_text.textChanged.connect(self._on_edit_new_label)
 
     def init_list(self):
         self.list_item_model = QStandardItemModel()
         self.ui.listView.setModel(self.list_item_model)
+        self.load_datalist()
+    
+    def load_datalist(self):
         self.load_numbers()
         for index,item in enumerate(self.data):
             self.list_item_model.appendRow(QStandardItem(str(index) + '_' + str(item[0])))
-    
 
+    
     def init_buttons(self):
         self.buttons=[]
         self.buttons.append(getattr(self.ui,'checkBox'))
@@ -53,7 +61,22 @@ class ApplicationWindow(QtWidgets.QDialog):
         for button in self.buttons:
             button.clicked.connect(self._on_clicked_matrix)
 
+    def _on_edit_new_label(self):
+        new_label = self.ui.number_label_text.text()
+        self.label_to_save =   new_label
+        self.current_number_label = new_label
+    
 
+    def _on_clicked_save(self):
+        if self.label_to_save is None or len(self.label_to_save)!=1 or not self.label_to_save.isdigit():
+            self.ui.number_label_text.setText('NO LABEL')
+            return 
+        with open(self.path,'a') as csv_data:
+            writer = csv.writer(csv_data)
+            writer.writerow([int(self.label_to_save)] + self.current_number_pixels)
+        self.init_list()
+    
+    
     def _on_clicked_clear(self):
         self.ui.predict_label.setText("")
         self.current_number_pixels = [0]*35
@@ -100,10 +123,12 @@ class ApplicationWindow(QtWidgets.QDialog):
         pass
     
 def main():
+    from config import Config
     app = QtWidgets.QApplication(sys.argv)
-    application = ApplicationWindow()
+    application = ApplicationWindow(Config)
     application.show()
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
+    
     main()
