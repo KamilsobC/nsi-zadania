@@ -41,6 +41,25 @@ class DigitClassifier35:
         print
 
         return accuracy
+    
+    def test_digit_classifier(self,x_test, y_test):
+        tp,tf=0,0
+        cnt=[0]*10
+        cnt_false=[0]*10
+        for sample, label in zip(x_test, y_test):
+            results = self.classify(sample,return_all=True)
+            if label == int(results[0][0]):
+                tp+=1
+                # print("label",label,"sucess:",results[0][0])
+                cnt[label]+=1
+            else:
+                tf+=1
+                # print("label",label,"failure:",results[0][0])
+                cnt_false[label]+=1
+        
+        for index,(good,bad) in enumerate(zip(cnt,cnt_false)):
+            print(index,"perceptron: +",good,"-",bad,good/(good+bad))
+        print(tp/(tp+tf))
 
     def load_data(self,path_to_data='result.csv'):
         return read_csv_to_pd(path_to_data)
@@ -54,14 +73,15 @@ class DigitClassifier35:
         
         self.perceptrons=perceptrons
 
-    def classify(self,data):
+    def classify(self,data,return_all=False):
         results = []
         for perceptron in self.perceptrons:
             prediction = perceptron.predict(data,return_sum=True)
             results.append((perceptron.name,prediction))
         result = sorted(results,key=lambda res:res[1])
         result.reverse()
-        print(result)    
+        if return_all:
+            return result    
         return result[0][0]
 
 if __name__ == "__main__":

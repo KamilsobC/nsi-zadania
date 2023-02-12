@@ -26,7 +26,7 @@ class ApplicationWindow(QtWidgets.QDialog):
         for per in self.classifier.perceptrons:
             print(per.name)
             self.classifier.calculate_accuracy(data_x,data_y,per)
-        
+        self.classifier.test_digit_classifier(data_x,data_y)
         
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
@@ -93,7 +93,10 @@ class ApplicationWindow(QtWidgets.QDialog):
         for index,button in enumerate(self.buttons):
             if button.isChecked():
                 self.current_number_pixels[index]=255
-    
+        data = list_to_numpy(self.current_number_pixels,True)
+        result = self.classifier.classify(data)
+        self.ui.predict_label.setText(str(result))
+
     def _on_clicked_ListViewItem(self):
         row_index = self.ui.listView.currentIndex().row()
         self.load_number_from_data(row_index)
