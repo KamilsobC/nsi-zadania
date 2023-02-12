@@ -11,7 +11,7 @@ class ApplicationWindow(QtWidgets.QDialog):
     def __init__(self,config):
         super(ApplicationWindow, self).__init__()
         self.path = config.path
-        
+        self.total = config.total
         self.data = None
         self.perceptrons = None
         self.current_number_pixels = [0]*config.total
@@ -92,7 +92,6 @@ class ApplicationWindow(QtWidgets.QDialog):
     def _on_clicked_matrix(self):
         for index,button in enumerate(self.buttons):
             if button.isChecked():
-                print(index)
                 self.current_number_pixels[index]=255
     
     def _on_clicked_ListViewItem(self):
@@ -104,20 +103,22 @@ class ApplicationWindow(QtWidgets.QDialog):
 
     def load_number_from_data(self,i):
         number = self.data[i]
+        self.clear()
         self.current_number_pixels = number[1:]
         self.current_number_label = number[0]
         self.draw_number_from_data()
 
     def draw_number_from_data(self):
-        self.clear()
         self.ui.currentNumberLabel.setText(str(self.current_number_label))
         for index,px in enumerate(self.current_number_pixels):
             if px == 255:
                 self.buttons[index].setChecked(True)
 
     def clear(self):
+        self.current_number_pixels=[0]*self.total
         for button in self.buttons:
             button.setChecked(False)
+        
 
     def load_perceptrons():
         pass

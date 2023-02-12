@@ -32,14 +32,17 @@ class Perceptron:
             return 1
         return 0
     
-    def predict(self, data, weights=None, bias=None):
+    def predict(self, data, weights=None, bias=None,return_sum=False):
         if weights is None:
             weights = self.weights
         if bias is None:
             bias = self.bias
 
-        prediction = np.dot(weights, data) + bias
-        prediction = self.activation_function(prediction)
+        sum = np.dot(weights, data) + bias
+
+        prediction = self.activation_function(sum)
+        if return_sum:
+            return sum
         return prediction
     
     def train(self,data,labels,log=False):

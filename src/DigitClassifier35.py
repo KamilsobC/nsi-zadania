@@ -57,10 +57,12 @@ class DigitClassifier35:
     def classify(self,data):
         results = []
         for perceptron in self.perceptrons:
-            prediction = perceptron.predict(data)
-            if prediction == 1:
-                results.append(perceptron.name)
-        return results
+            prediction = perceptron.predict(data,return_sum=True)
+            results.append((perceptron.name,prediction))
+        result = sorted(results,key=lambda res:res[1])
+        result.reverse()
+        print(result)    
+        return result[0][0]
 
 if __name__ == "__main__":
     dc = DigitClassifier35()
