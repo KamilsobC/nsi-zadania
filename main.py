@@ -59,7 +59,7 @@ class ApplicationWindow(QtWidgets.QDialog):
             button =  getattr(self.ui,res)
             self.buttons.append(button)
         for button in self.buttons:
-            button.clicked.connect(self._on_clicked_matrix)
+            button.stateChanged.connect(self._on_clicked_matrix)
 
     def _on_edit_new_label(self):
         new_label = self.ui.number_label_text.text()
