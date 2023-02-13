@@ -14,6 +14,7 @@ pandas = "*"
 pillow = "*"
 pygame = "*"
 opencv-contrib-python = "*"
+black = "*"
 
 [dev-packages]
 

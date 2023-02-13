@@ -1,92 +1,40 @@
 import numpy as np
 import json
-import gzip
-import cv2
 from PIL import Image
 
 class NN():
-    def __init__(self):
-        np.random.seed(42)
-        self.learning_rate = 10e-4
-
-    def extracting_data(self):
-        # Extracting images
-        with gzip.open('mnist_data/train-images-idx3-ubyte.gz', 'r') as f:
-            # first 4 bytes is a magic number
-            magic_number = int.from_bytes(f.read(4), 'big')
-            # second 4 bytes is the number of images
-            image_count = int.from_bytes(f.read(4), 'big')
-            # third 4 bytes is the row count
-            row_count = int.from_bytes(f.read(4), 'big')
-            # fourth 4 bytes is the column count
-            column_count = int.from_bytes(f.read(4), 'big')
-            # rest is the image pixel data, each pixel is stored as an unsigned byte
-            # pixel values are 0 to 255
-            image_data = f.read()
-            images = np.frombuffer(image_data, dtype=np.uint8).reshape((image_count, row_count, column_count))
-        print('Images extraction complete!')
-
-        # Extracting labels
-        with gzip.open('mnist_data/train-labels-idx1-ubyte.gz', 'r') as f:
-            # first 4 bytes is a magic number
-            magic_number = int.from_bytes(f.read(4), 'big')
-            # second 4 bytes is the number of labels
-            label_count = int.from_bytes(f.read(4), 'big')
-            # rest is the label data, each label is stored as unsigned byte
-            # label values are 0 to 9
-            label_data = f.read()
-            labels = np.frombuffer(label_data, dtype=np.uint8)
-        print('Labes extraction complete!')
-
-        # Extracting test images
-        with gzip.open('mnist_data/t10k-images-idx3-ubyte.gz', 'r') as f:
-            # first 4 bytes is a magic number
-            magic_number = int.from_bytes(f.read(4), 'big')
-            # second 4 bytes is the number of images
-            image_count = int.from_bytes(f.read(4), 'big')
-            # third 4 bytes is the row count
-            row_count = int.from_bytes(f.read(4), 'big')
-            # fourth 4 bytes is the column count
-            column_count = int.from_bytes(f.read(4), 'big')
-            # rest is the image pixel data, each pixel is stored as an unsigned byte
-            # pixel values are 0 to 255
-            image_data = f.read()
-            images_test = np.frombuffer(image_data, dtype=np.uint8).reshape((image_count, row_count, column_count))
-        print('Test Images extraction complete!')
-
-        # Extracting test labels
-        with gzip.open('mnist_data/t10k-labels-idx1-ubyte.gz', 'r') as f:
-            # first 4 bytes is a magic number
-            magic_number = int.from_bytes(f.read(4), 'big')
-            # second 4 bytes is the number of labels
-            label_count = int.from_bytes(f.read(4), 'big')
-            # rest is the label data, each label is stored as unsigned byte
-            # label values are 0 to 9
-            label_data = f.read()
-            labels_test = np.frombuffer(label_data, dtype=np.uint8)
-        print('Test Labels extraction complete!')
-
-        data = {
-                'images': images.tolist(),
-                'labels': labels.tolist(),
-                'images_test': images_test.tolist(),
-                'labels_test': labels_test.tolist(),
-            }
-
-        with open('training/data.json', 'w') as json_file:
-            json.dump(data, json_file)
+    def __init__(self,batch_size=32,hidden_neurons=750,epochs=1000,data_amount=60000,learning_rate=0.0001,path = 'training/params.json'):
         
-        print('Data saved!')
+        np.random.seed(100)
+        self.data_amount = data_amount
+        self.test_amount = int(data_amount/4) 
+        self.batch_size = batch_size
+        self.hidden_neurons = hidden_neurons
+        self.desired_epochs = epochs
+        self.path = path
+        self.learning_rate = learning_rate
 
     def load_data(self):
         with open('training/data.json') as f:
+            print('Loading data from json...')
             raw_data = json.load(f)
-        
-        self.training_set = np.array(raw_data['images'])
-        self.labels = np.array(raw_data['labels'])
 
-        self.test_set = np.array(raw_data['images_test'])
-        self.test_labels = np.array(raw_data['labels_test'])
+        self.training_set = np.array(raw_data['images'])[:self.data_amount]
+        self.labels = np.array(raw_data['labels'])[:self.data_amount]
+        self.test_set = np.array(raw_data['images_test'])[:self.test_amount]
+        self.test_labels = np.array(raw_data['labels_test'])[:self.test_amount]
+
+    def _prepare_data_set(self,data):
+        data = (data.astype(np.float32) - 127.5) / 127.5
+        data =  data.reshape(data.shape[0], data.shape[1] * data.shape[2])
+        keys = np.array(range(data.shape[0]))
+        np.random.shuffle(keys)
+        data =data[keys]
+        self.labels = self.labels[keys]
+        self.processed_labels = np.zeros((len(data), 10))
+        for i in range(len(data)):
+            self.processed_labels[i][self.labels[i]] = 1
+        return data
 
     def data_preprocessing(self):
         # Scalin data
@@ -110,38 +58,38 @@ class NN():
             self.processed_labels[i][self.labels[i]] = 1
 
     def chunking(self):
-        self.batch_size = 32
         self.steps = self.training_set.shape[0] // self.batch_size
 
         if self.steps * self.batch_size < self.training_set.shape[0]:
             self.steps += 1
 
-    def parameters_generation(self):
-        instances = self.training_set.shape[0]
-        attributes = self.training_set.shape[1]
-        output_labels = len(self.processed_labels[0])
+    def load_weights(self,load_from_path=False):
+        if load_from_path:
+            parameters = None
+            with open(self.path) as f:
+                parameters = json.load(f)
+            self.hidden_layer1 = np.array(parameters['weights_hidden1'])
+            self.output_layer = np.array(parameters['weights_output'])
+            self.bias_h1 = np.array(parameters['bias_h1'])
+            self.bias_o = np.array(parameters['bias_o'])
+        else:
+            attributes = self.training_set.shape[1]
+            output_labels = len(self.processed_labels[0])
+            hidden_nodes1 = self.hidden_neurons
+            self.weights_hidden1 = np.random.rand(attributes, hidden_nodes1) * 0.01
+            self.bias_h1 = np.random.randn(hidden_nodes1)
+            self.weights_output = np.random.rand(hidden_nodes1, output_labels) * 0.01
+            self.bias_o = np.random.randn(output_labels)
 
-        hidden_nodes1 = int(len(self.training_set[0]) * 1.25)
-
-        self.weights_hidden1 = np.random.rand(attributes, hidden_nodes1) * 0.01
-        self.bias_h1 = np.random.randn(hidden_nodes1)
-
-        self.weights_output = np.random.rand(hidden_nodes1, output_labels) * 0.01
-        self.bias_o = np.random.randn(output_labels)
-        
-        print('Parameters generated!')
-
-    def memory(self):
+    def save_weights(self):
         data = {
             'weights_hidden1': self.weights_hidden1.tolist(),
             'bias_h1': self.bias_h1.tolist(),
-            'weights_hidden2': self.weights_hidden2.tolist(),
-            'bias_h2': self.bias_h2.tolist(),
             'weights_output': self.weights_output.tolist(),
             'bias_o': self.bias_o.tolist(),
         }
 
-        with open('training/params.json', 'w') as json_file:
+        with open(self.path, 'w') as json_file:
             json.dump(data, json_file)
 
     def sigmoid(self, x):
@@ -159,34 +107,35 @@ class NN():
         expx = np.exp(x)
         return expx / expx.sum(axis=index, keepdims=True)
 
-    def training(self, iterations):
+    def training(self):
+        self.load_data()
+        self.data_preprocessing()
+        self.chunking()
+        self.load_weights()
         error_cost = 0
-        iter_num = 0
 
-        for i in range(iterations):
+        for i in range(self.desired_epochs):
+
             for step in range(self.steps):
+            
                 x_batch = self.training_set[step * self.batch_size:(step + 1) * self.batch_size]
                 y_batch = self.processed_labels[step * self.batch_size:(step + 1) * self.batch_size]
 
-                ########## Step 1 - Hidden layer #1
+
                 X1 = np.dot(x_batch, self.weights_hidden1) + self.bias_h1
                 prediction_h1 = self.sigmoid(X1)
 
-                ########## Step 2 - Output layer
                 y = np.dot(prediction_h1, self.weights_output) + self.bias_o
                 prediction_o = self.softmax(y)
                 
                 ######### Back Propagation
 
-                ########## Step 1 - Output layer
                 pred_h1 = prediction_h1
-
                 error_cost_o = prediction_o - y_batch
-
                 der_cost_o = np.dot(pred_h1.T, error_cost_o)
                 dcost_bo = error_cost_o
-                
-                ########## Step 2 - Hidden layer #3
+
+
                 taining_data = x_batch
 
                 weight_o = self.weights_output
@@ -197,27 +146,34 @@ class NN():
 
                 dcost_bh1 = error_cost_h1 * derivative_h1
 
-                ########## Update Weights and Biases
-
+                #hidden
                 self.weights_hidden1 -= self.learning_rate * der_cost_h1
                 self.bias_h1 -= self.learning_rate * dcost_bh1.sum(axis=0)
-
+                
+                #output
                 self.weights_output -= self.learning_rate * der_cost_o
                 self.bias_o -= self.learning_rate * dcost_bo.sum(axis=0)
                 
                 loss = np.sum(-y_batch * np.log(prediction_o))
                 error_cost = loss
+                print(error_cost)
 
-            iter_num += 1
-            print('Iterations: ' + str(iter_num))
-            print(error_cost)
-        self.memory()
-        print('Training is done!')
+            print('Iterations: ' + str(i))
+        self.save_weights()
 
-    def think(self, sample):
-        with open('training/params.json') as f:
+
+    def forward(self,batch):
+        X1 = np.dot(batch, self.weights_hidden1) + self.bias_h1
+        prediction_h1 = self.sigmoid(X1)
+
+        y = np.dot(prediction_h1, self.weights_output) + self.bias_o
+        prediction_o = self.softmax(y)
+        return prediction_o,prediction_h1
+        
+    def predict(self, sample):
+        with open(self.path) as f:
             raw_data = json.load(f)
-
+        
         hidden_layer1 = np.array(raw_data['weights_hidden1'])
         output_layer = np.array(raw_data['weights_output'])
         bias_h1 = np.array(raw_data['bias_h1'])
@@ -239,45 +195,35 @@ class NN():
         count = 0
 
         for i in range(len(self.test_set)):
-            result = self.think(self.test_set[i])
+            result = self.predict(self.test_set[i])
             label = self.test_labels[i]
             
-            print('Result:')
-            print(result)
-            print('Label:')
-            print(label)
-
+            
             if (result == label):
+                print('SUCCESS,Result:',result,'Label',label)
+
                 correct += 1
             else:
+                print('ERROR,Result:',result,'Label',label)
+
                 error += 1
             
             count += 1
-            print(count)
+            print(count,str(correct/count))
+        # error_result = (error / len(self.test_set)) * 100
 
-        # Calculating error rate
-        error_result = (error / len(self.test_set)) * 100
-        print('Error rate is: ' + str(error_result) + '%')
 
-############################### Execution ################################
-net = NN()
-# Extracting data from Minist database
-net.extracting_data()
+if __name__ == "__main__":
+    epochs=100
+    batch_size = 32
+    amount_of_hidden_layer_neurons = 350
+    data_amount = 10000
+    path = 'training/params1.json'
 
-# Loading data from JSON file
-net.load_data()
-
-# Preprocessing data
-net.data_preprocessing()
-
-# Batching
-net.chunking()
-
-# Generation weights and bieses
-net.parameters_generation()
-
-# Training
-net.training(1000)
-
-# Evaluating 
-net.testing()
+    net = NN(data_amount = data_amount,hidden_neurons=amount_of_hidden_layer_neurons,batch_size=batch_size,epochs=epochs,path=path)
+    # net.load_data()
+    # net.data_preprocessing()
+    # net.chunking()
+    # net.load_weights()
+    net.training()
+    net.testing()
