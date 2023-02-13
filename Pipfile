@@ -12,6 +12,8 @@ pyqt5-tools = "*"
 jupyterlab = "*"
 pandas = "*"
 pillow = "*"
+pygame = "*"
+opencv-contrib-python = "*"
 
 [dev-packages]
 

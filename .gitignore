@@ -6,3 +6,5 @@ __pycache__
 *.pickle
 saved_data/*
 !saved_data/.gitkeep 
+mnist_data/*
+training/data.json
