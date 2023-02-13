@@ -28,24 +28,25 @@ class NN():
         data = (data.astype(np.float32) - 127.5) / 127.5
         data =  data.reshape(data.shape[0], data.shape[1] * data.shape[2])
         return data
-        
-    def _prepare_data_set(self,data,labels):
-        keys = np.array(range(data.shape[0]))
-        np.random.shuffle(keys)
-        data =data[keys]
-        labels = labels[keys]
-        proc_labels = np.zeros((len(data), 10))
-        for i in range(len(data)):
-            proc_labels[i][self.labels[i]] = 1
-        return data,proc_labels
-
+    
+    
     def data_preprocessing(self):
-
         self.training_set = self._normalize_data_set(self.training_set)
         self.test_set = self._normalize_data_set(self.test_set)
-        train_data,train_labels = self._prepare_data_set(self.training_set,self.labels)
-        self.train_data = train_data
-        self.processed_labels = train_labels
+
+        # Data Shafelling
+        keys = np.array(range(self.training_set.shape[0]))
+        np.random.shuffle(keys)
+
+
+        self.training_set = self.training_set[keys]
+        self.labels = self.labels[keys]
+
+        # Labers preporcessing
+        self.processed_labels = np.zeros((len(self.training_set), 10))
+        for i in range(len(self.training_set)):
+            self.processed_labels[i][self.labels[i]] = 1
+        
 
     def chunking(self):
         self.steps = self.training_set.shape[0] // self.batch_size
@@ -71,7 +72,7 @@ class NN():
             self.weights_output = np.random.rand(hidden_nodes1, output_labels) * 0.01
             self.bias_o = np.random.randn(output_labels)
 
-    def save_weights(self):
+    def save_weights(self,additional_path_in):
         data = {
             'weights_hidden1': self.weights_hidden1.tolist(),
             'bias_h1': self.bias_h1.tolist(),
@@ -80,7 +81,6 @@ class NN():
         }
 
         with open(self.path, 'w') as json_file:
-            print('Saving weights')
             json.dump(data, json_file)
 
     def sigmoid(self, x):
@@ -171,7 +171,6 @@ class NN():
         self.load_weights(load_from_path=True)
         self.load_data()
         self.data_preprocessing()
-
         error = 0
         correct = 0
         count = 0
@@ -192,7 +191,6 @@ class NN():
             
             count += 1
             print(count,str(correct/count))
-        # error_result = (error / len(self.test_set)) * 100
 
 
 if __name__ == "__main__":
@@ -200,12 +198,12 @@ if __name__ == "__main__":
     batch_size = 32
     amount_of_hidden_layer_neurons = 350
     data_amount = 10000
-    path = 'training/params3.json'
+    path = 'training/params4.json'
 
     net = NN(data_amount = data_amount,hidden_neurons=amount_of_hidden_layer_neurons,batch_size=batch_size,epochs=epochs,path=path)
     # net.load_data()
     # net.data_preprocessing()
     # net.chunking()
     # net.load_weights()
-    net.training()
+    # net.training()
     net.testing()
