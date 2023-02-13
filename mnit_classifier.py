@@ -24,38 +24,28 @@ class NN():
         self.test_set = np.array(raw_data['images_test'])[:self.test_amount]
         self.test_labels = np.array(raw_data['labels_test'])[:self.test_amount]
 
-    def _prepare_data_set(self,data):
+    def _normalize_data_set(self,data):
         data = (data.astype(np.float32) - 127.5) / 127.5
         data =  data.reshape(data.shape[0], data.shape[1] * data.shape[2])
+        return data
+        
+    def _prepare_data_set(self,data,labels):
         keys = np.array(range(data.shape[0]))
         np.random.shuffle(keys)
         data =data[keys]
-        self.labels = self.labels[keys]
-        self.processed_labels = np.zeros((len(data), 10))
+        labels = labels[keys]
+        proc_labels = np.zeros((len(data), 10))
         for i in range(len(data)):
-            self.processed_labels[i][self.labels[i]] = 1
-        return data
+            proc_labels[i][self.labels[i]] = 1
+        return data,proc_labels
 
     def data_preprocessing(self):
-        # Scalin data
-        self.training_set = (self.training_set.astype(np.float32) - 127.5) / 127.5
-        self.test_set = (self.test_set.astype(np.float32) - 127.5) / 127.5
-   
-        # Reshaping into the 1 dimensional array
-        self.training_set =  self.training_set.reshape(self.training_set.shape[0], self.training_set.shape[1] * self.training_set.shape[2])
-        self.test_set =  self.test_set.reshape(self.test_set.shape[0], self.test_set.shape[1] * self.test_set.shape[2])
 
-        # Data Shafelling
-        keys = np.array(range(self.training_set.shape[0]))
-        np.random.shuffle(keys)
-        self.training_set = self.training_set[keys]
-        self.labels = self.labels[keys]
-
-        # Labers preporcessing
-        self.processed_labels = np.zeros((len(self.training_set), 10))
-
-        for i in range(len(self.training_set)):
-            self.processed_labels[i][self.labels[i]] = 1
+        self.training_set = self._normalize_data_set(self.training_set)
+        self.test_set = self._normalize_data_set(self.test_set)
+        train_data,train_labels = self._prepare_data_set(self.training_set,self.labels)
+        self.train_data = train_data
+        self.processed_labels = train_labels
 
     def chunking(self):
         self.steps = self.training_set.shape[0] // self.batch_size
@@ -68,8 +58,8 @@ class NN():
             parameters = None
             with open(self.path) as f:
                 parameters = json.load(f)
-            self.hidden_layer1 = np.array(parameters['weights_hidden1'])
-            self.output_layer = np.array(parameters['weights_output'])
+            self.weights_hidden1 = np.array(parameters['weights_hidden1'])
+            self.weights_output = np.array(parameters['weights_output'])
             self.bias_h1 = np.array(parameters['bias_h1'])
             self.bias_o = np.array(parameters['bias_o'])
         else:
@@ -90,6 +80,7 @@ class NN():
         }
 
         with open(self.path, 'w') as json_file:
+            print('Saving weights')
             json.dump(data, json_file)
 
     def sigmoid(self, x):
@@ -156,7 +147,7 @@ class NN():
                 
                 loss = np.sum(-y_batch * np.log(prediction_o))
                 error_cost = loss
-                print(error_cost)
+            print(error_cost)
 
             print('Iterations: ' + str(i))
         self.save_weights()
@@ -169,27 +160,18 @@ class NN():
         y = np.dot(prediction_h1, self.weights_output) + self.bias_o
         prediction_o = self.softmax(y)
         return prediction_o,prediction_h1
-        
+
     def predict(self, sample):
-        with open(self.path) as f:
-            raw_data = json.load(f)
-        
-        hidden_layer1 = np.array(raw_data['weights_hidden1'])
-        output_layer = np.array(raw_data['weights_output'])
-        bias_h1 = np.array(raw_data['bias_h1'])
-        bias_o = np.array(raw_data['bias_o'])
-
-        X1 = np.dot(sample, hidden_layer1) + bias_h1
-        hidden_layer1 = self.sigmoid(X1)
-
-        y = np.dot(hidden_layer1, output_layer) + bias_o
-        output_layer = np.array(self.softmax(y))
-        
-        label = np.argmax(output_layer)
+        output, _ = self.forward(sample)
+        label = np.argmax(output)
         
         return label
         
     def testing(self):
+        self.load_weights(load_from_path=True)
+        self.load_data()
+        self.data_preprocessing()
+
         error = 0
         correct = 0
         count = 0
@@ -218,7 +200,7 @@ if __name__ == "__main__":
     batch_size = 32
     amount_of_hidden_layer_neurons = 350
     data_amount = 10000
-    path = 'training/params1.json'
+    path = 'training/params3.json'
 
     net = NN(data_amount = data_amount,hidden_neurons=amount_of_hidden_layer_neurons,batch_size=batch_size,epochs=epochs,path=path)
     # net.load_data()
