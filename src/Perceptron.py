@@ -39,7 +39,7 @@ class Perceptron:
             bias = self.bias
 
         sum = np.dot(weights, data) + bias
-
+        
         prediction = self.activation_function(sum)
         if return_sum:
             return sum

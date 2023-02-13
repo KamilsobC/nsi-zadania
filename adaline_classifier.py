@@ -182,7 +182,7 @@ if __name__ == "__main__":
     batch_size = 32
     amount_of_hidden_layer_neurons = 350
     data_amount = 15000
-    path = 'training/params8.json'
+    path = 'training/params1.json'
     size_img = (28,28)
 
     net = NN(data_amount = data_amount,hidden_neurons=amount_of_hidden_layer_neurons,batch_size=batch_size,epochs=epochs,path=path)
