@@ -180,7 +180,7 @@ class NN():
 if __name__ == "__main__":
     epochs=125
     batch_size = 64
-    amount_of_hidden_layer_neurons = 10
+    amount_of_hidden_layer_neurons = 392
     data_amount = 15000
     path = 'training/params' + str(amount_of_hidden_layer_neurons)   +'.json'
     size_img = (28,28)
@@ -191,4 +191,4 @@ if __name__ == "__main__":
     # net.chunking()
     # net.load_weights()
     # net.training()
-    # net.testing()
+    net.testing()
