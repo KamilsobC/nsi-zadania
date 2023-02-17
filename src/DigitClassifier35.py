@@ -15,7 +15,7 @@ class DigitClassifier35:
             data_for_number = prepare_data_for_perceptron(data,int(perceptron.name))
             x_train,x_test,y_train,y_test =  create_train_test_sets(data_for_number)
             perceptron.train(x_train, y_train)   
-            save_pickle(perceptron,'saved_data/perc'+str(perceptron.name)+'.pickle')
+            save_pickle(perceptron,'saved_data/percy'+str(perceptron.name)+'.pickle')
     
     def calculate_accuracy(self,x_test, y_test,perceptron):
         tp, tn, fp, fn = 0, 0, 0, 0
@@ -68,7 +68,7 @@ class DigitClassifier35:
         perceptrons = []
 
         for i in range(10):
-            perceptron =load_pickle('saved_data/perc'+ str(i) +'.pickle')
+            perceptron =load_pickle('saved_data/percy'+ str(i) +'.pickle')
             perceptrons.append(perceptron)
         
         self.perceptrons=perceptrons

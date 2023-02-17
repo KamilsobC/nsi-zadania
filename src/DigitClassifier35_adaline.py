@@ -3,7 +3,7 @@ from src.Adaline import Adaline
 from src.utils import *
 
 
-class DigitClassifier35:
+class DigitClassifier35Adaline:
 
     def __init__(self,path_to_data='result.csv'):
         self.perceptrons = []
@@ -75,7 +75,6 @@ class DigitClassifier35:
 
     def classify(self,data,return_all=False):
         results = []
-        best_fit = 0.8
         for perceptron in self.perceptrons:
             prediction = perceptron.predict(data)                
             results.append((perceptron.name,prediction))

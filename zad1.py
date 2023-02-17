@@ -4,8 +4,8 @@ from PyQt5.QtCore import QModelIndex
 from ui import Ui_Dialog
 import sys
 from src.utils import *
-# from src.DigitClassifier35 import DigitClassifier35
-from src.DigitClassifier35_adaline import DigitClassifier35
+from src.DigitClassifier35 import DigitClassifier35
+# from src.DigitClassifier35_adaline import DigitClassifier35
 import csv
 
 class ApplicationWindow(QtWidgets.QDialog):

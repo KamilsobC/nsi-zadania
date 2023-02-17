@@ -56,7 +56,7 @@ class Perceptron:
         errors = list()
         epochs = list()
             
-        while (epoch <= 1000) and (error > 0.0001):
+        while (epoch <= 3000) and (error > 0.0001):
             
             loss_ = 0
             for i in range(data.shape[0]):
