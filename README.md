@@ -1,7 +1,7 @@
 # nsi-zadania
 
 
-zad1 -  Perceptron Classifier z UI
+## zad1 -  Perceptron Classifier z UI
 
  zad1.py - UI do klasyfikatora
  ui.py - wyexportowane z Qtdesigner ui
@@ -16,7 +16,7 @@ zad1 -  Perceptron Classifier z UI
      test_classifier()
      test_perceptron()
     
-zad3 -  Adaline Classifier z UI
+## zad3 -  Adaline Classifier z UI
 
  zad2.py - UI do klasyfikatora
  ui.py - wyexportowane z Qtdesigner ui
@@ -31,7 +31,7 @@ zad3 -  Adaline Classifier z UI
      test_adaline()
      test_classifier_adaline()
      
-zad 7 - NN Mnist classifier z brackpropagation
+## zad 7 - NN Mnist classifier z brackpropagation
 
 zad7.py - klasa z Siecią Neuronową (784,N-ukrytych neuronów, 10)
 zad7.ipynb - możliwość sprawdzenia sieci na poszczególnym samplu
