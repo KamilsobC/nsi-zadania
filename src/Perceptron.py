@@ -31,7 +31,7 @@ class Perceptron:
         if prediction >= 0:
             return 1
         return 0
-    
+        
     def predict(self, data, weights=None, bias=None,return_sum=False):
         if weights is None:
             weights = self.weights
@@ -61,16 +61,12 @@ class Perceptron:
             loss_ = 0
             for i in range(data.shape[0]):
 
-                # Forward Propagation on each data point
                 label_pred, loss, d_loss = self.forwardprop(data[i], labels[i], weights, bias)
 
-                # Backpropagation
                 partial_derivates = self.backprop(data[i], d_loss)
                 
-                # Learn by updating the weights of the perceptron
                 weights = weights - (lr * np.array(partial_derivates))
 
-            # Evaluate the results
             for index, feature_value_test in enumerate(data):
                 label_pred, loss, d_loss = self.forwardprop(feature_value_test, labels[index], weights, bias)
                 loss_ += loss

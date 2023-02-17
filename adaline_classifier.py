@@ -3,7 +3,7 @@ import json
 from PIL import Image
 
 class NN():
-    def __init__(self,batch_size=32,hidden_neurons=750,epochs=1000,data_amount=60000,learning_rate=0.0001,path = 'training/params.json'):
+    def __init__(self,batch_size=32,hidden_neurons=10,epochs=1000,data_amount=60000,learning_rate=0.0001,path = 'training/params.json'):
         
         np.random.seed(100)
         self.data_amount = data_amount
@@ -56,23 +56,17 @@ class NN():
             with open(self.path) as f:
                 parameters = json.load(f)
             self.weights_hidden1 = np.array(parameters['weights_hidden1'])
-            self.weights_output = np.array(parameters['weights_output'])
             self.bias_h1 = np.array(parameters['bias_h1'])
-            self.bias_o = np.array(parameters['bias_o'])
         else:
             attributes = self.training_set.shape[1]
             output_labels = len(self.processed_labels[0])
-            self.weights_hidden1 = np.random.rand(attributes, self.hidden_neurons) * 0.01
-            self.bias_h1 = np.random.randn(self.hidden_neurons)
-            self.weights_output = np.random.rand(self.hidden_neurons, output_labels) * 0.01
-            self.bias_o = np.random.randn(output_labels)
+            self.weights_hidden1 = np.random.rand(attributes, output_labels) * 0.01
+            self.bias_h1 = np.random.randn(output_labels)
 
     def save_weights(self):
         data = {
             'weights_hidden1': self.weights_hidden1.tolist(),
             'bias_h1': self.bias_h1.tolist(),
-            'weights_output': self.weights_output.tolist(),
-            'bias_o': self.bias_o.tolist(),
         }
 
         with open(self.path, 'w') as json_file:
@@ -111,7 +105,7 @@ class NN():
 
                 self.backprop(prediction_o,prediction_h1,x_batch,y_batch,X1)
                 
-                loss = np.sum(-y_batch * np.log(prediction_o))
+                loss = np.sum(-y_batch * np.log(prediction_h1))
                 error_cost = loss
 
             print(error_cost)
@@ -124,33 +118,28 @@ class NN():
         X1 = np.dot(batch, self.weights_hidden1) + self.bias_h1
         prediction_h1 = self.sigmoid(X1)
 
-        y = np.dot(prediction_h1, self.weights_output) + self.bias_o
-        prediction_o = self.softmax(y)
+        # y =np.dot(prediction_h1, self.weights_output) + self.bias_o
+        # prediction_o = self.softmax(y)
+        prediction_o = None
+        y = None
         return prediction_o,prediction_h1,X1,y
     
     def backprop(self,prediction_o,prediction_h1,x_batch,y_batch,X1):
-        error_cost_o = prediction_o - y_batch
-        der_cost_o = np.dot(prediction_h1.T, error_cost_o)
+        
+        error_cost_o = prediction_h1 - y_batch
+        error_cost_h1 = np.dot(x_batch, self.weights_hidden1)
 
-        weight_o = self.weights_output
-        error_cost_h1 = np.dot(error_cost_o, weight_o.T)
-
-        derivative_h1 = self.sigmoid_der(X1)
-        dcost_bh1 = error_cost_h1 * derivative_h1
-        der_cost_h1 = np.dot(x_batch.T, derivative_h1 * error_cost_h1)
+        dcost_bh1 = error_cost_h1 * self.sigmoid_der(X1)
+        der_cost_h1 = np.dot(x_batch.T, self.sigmoid_der(X1) * error_cost_h1)
 
         #hidden
         self.weights_hidden1 -= self.learning_rate * der_cost_h1
         self.bias_h1 -= self.learning_rate * dcost_bh1.sum(axis=0)
-        
-        #output
-        self.weights_output -= self.learning_rate * der_cost_o
-        self.bias_o -= self.learning_rate * error_cost_o.sum(axis=0)
 
 
     def predict(self, sample):
-        output, _,_,_ = self.forward(sample)
-        label = np.argmax(output)
+        output, prediction_h1,_,_ = self.forward(sample)
+        label = np.argmax(prediction_h1)
         
         return label
         
@@ -178,11 +167,11 @@ class NN():
 
 
 if __name__ == "__main__":
-    epochs=125
+    epochs=1250
     batch_size = 32
-    amount_of_hidden_layer_neurons = 350
-    data_amount = 15000
-    path = 'training/params1.json'
+    amount_of_hidden_layer_neurons = 10
+    data_amount = 10000
+    path = 'training/params_adaline10neurons.json'
     size_img = (28,28)
 
     net = NN(data_amount = data_amount,hidden_neurons=amount_of_hidden_layer_neurons,batch_size=batch_size,epochs=epochs,path=path)
@@ -190,5 +179,5 @@ if __name__ == "__main__":
     # net.data_preprocessing()
     # net.chunking()
     # net.load_weights()
-    # net.training()
-    net.testing()
+    net.training()
+    # net.testing()
