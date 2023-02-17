@@ -4,7 +4,8 @@ from PyQt5.QtCore import QModelIndex
 from ui import Ui_Dialog
 import sys
 from src.utils import *
-from src.DigitClassifier35 import DigitClassifier35
+# from src.DigitClassifier35 import DigitClassifier35
+from src.DigitClassifier35_adaline import DigitClassifier35
 import csv
 
 class ApplicationWindow(QtWidgets.QDialog):
@@ -71,10 +72,12 @@ class ApplicationWindow(QtWidgets.QDialog):
         if self.label_to_save is None or len(self.label_to_save)!=1 or not self.label_to_save.isdigit():
             self.ui.number_label_text.setText('NO LABEL')
             return 
+
         with open(self.path,'a') as csv_data:
             writer = csv.writer(csv_data)
             writer.writerow([int(self.label_to_save)] + self.current_number_pixels)
         self.init_list()
+        self.clear()
     
     
     def _on_clicked_clear(self):
@@ -89,10 +92,10 @@ class ApplicationWindow(QtWidgets.QDialog):
         result = self.classifier.classify(data)
         self.ui.predict_label.setText(str(result))
     
-    def _on_clicked_matrix(self):
-        for index,button in enumerate(self.buttons):
-            if button.isChecked():
-                self.current_number_pixels[index]=255
+    def _on_clicked_matrix(self,data):
+        btnz = lambda x: 255 if x else 0
+        list_of_clicked_btnz = [btnz(x.isChecked()) for x in self.buttons]
+        self.current_number_pixels=  list_of_clicked_btnz
         data = list_to_numpy(self.current_number_pixels,True)
         result = self.classifier.classify(data)
         self.ui.predict_label.setText(str(result))
@@ -118,10 +121,19 @@ class ApplicationWindow(QtWidgets.QDialog):
                 self.buttons[index].setChecked(True)
 
     def clear(self):
+        for index,data in enumerate(self.buttons):
+            self.buttons[index].setChecked(True)
+            self.buttons[index].setChecked(False)
         self.current_number_pixels=[0]*self.total
-        for button in self.buttons:
-            button.setChecked(False)
-        
+        z = lambda x: True if x>0 else False
+        rez = len(list(filter(z,self.current_number_pixels)))
+        btnz = lambda x: True if x else False
+        list_of_clicked_btnz = [btnz(x.isChecked()) for x in self.buttons]
+        cnt=0
+        for btn in list_of_clicked_btnz:
+            if btn:
+                cnt+=1
+        print(rez,cnt)
 
     def load_perceptrons():
         pass

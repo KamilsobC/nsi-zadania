@@ -1,4 +1,6 @@
 from src.Perceptron import Perceptron
+from src.Adaline import Adaline
+
 from src.utils import *
 from src.DigitClassifier35 import DigitClassifier35 
 def test_perceptron():
@@ -15,6 +17,33 @@ def test_perceptron():
     test_label=list_to_numpy(eg_label)
     x = perceptron.predict(test_data)
     print(x)
+
+def test_adaline():
+    perceptron = Adaline("0",epochs = 5000)
+    create_csv_mnist_dataset()
+    data = read_csv_to_pd('result.csv')
+    desired_detections=[0,1,2,3,4,5,6,7,8,9]
+    data_for_number = prepare_data_for_perceptron(data,0)
+    x_train,x_test,y_train,y_test =  create_train_test_sets(data_for_number)
+    weights, bias, errors = perceptron.train(x_train, y_train)
+    cnt = 0
+    max_error = 0.9
+    for data,labels in zip(x_test,y_test):
+        test_data = list_to_numpy(data)
+        test_label = list_to_numpy(labels)
+        x = perceptron.predict(test_data)
+        if x>max_error and test_label==1:
+            cnt+=1
+            print('good tp',x,test_label)
+        if x>max_error and test_label==0:
+            print('bad tf',x,test_label)
+    
+        if x<max_error and test_label==0:
+            cnt+=1
+            print('good tn',x,test_label)
+        if x<max_error and test_label==1:
+            print('bad fn',x,test_label)
+    print(cnt/len(x_test))
 
 def test_classifier():
     dc = DigitClassifier35()
@@ -35,5 +64,5 @@ def test_classifier():
     # dc.calculate_accuracy(x_test,y_test,dc.perceptrons[0])
     
 if __name__ == "__main__":
-    # test_perceptron()
-    test_classifier()
+    test_adaline()
+    # test_classifier()
