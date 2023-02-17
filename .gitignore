@@ -12,3 +12,4 @@ images/*
 *.jpg
 *.pth
 data/*
+!result.csv
